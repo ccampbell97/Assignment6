@@ -10,13 +10,7 @@ class digit
     int data;
     digit *next = nullptr;
 };
-/*
-digit *loadNumber(ifstream &file)
-{
-  digit theDigit;
-  return theDigit;
-}
-*/
+
 char getOperator(ifstream &file)
 {
   char op;
@@ -25,13 +19,18 @@ char getOperator(ifstream &file)
   getline(file, endLine);
   return op;
 }
-/*
+
 void writeNumber(digit *num, ofstream &file)
 {
-
+  while(num != nullptr)
+  {
+    file << num->data;
+    num = num->next;
+  }
+  file << endl;
   return;
 }
-*/
+
 digit *deleteNumber(digit *num)
 {
   digit *dig;
@@ -44,25 +43,34 @@ digit *deleteNumber(digit *num)
 digit *addNumbers(digit *left, digit *right)
 {
   digit *total = new digit;
-  //digit *ltemp = new digit;
-  //digit *rtemp = new digit;
-  int num;
-  while(left != nullptr || right != nullptr)
+  digit *tTemp = total;
+  int num, carryOver = 0;
+  while(left != nullptr && right != nullptr)
   {
     num = left->data + right->data;
-    cout << left->next->data;
-    cout << "Num is " << num;
-    //total->data = num;
+    //cout << "Num is " << num << endl;
+    if(num > 9)
+    {
+      num = num - 10;
+      total->data = num + carryOver;
+      carryOver = 1;
+    }
+    else
+    {
+      total->data = num + carryOver;
+      carryOver = 0;
+    }
     //cout << total->data;
-    //left = left->next;
-    //right = right->next;
-    //num = left->data + right->data;
-    left = deleteNumber(left);
-    right = deleteNumber(right);
-    cout << "Num is " << num;
-    break;
-    //deleteNumber(left);
-    //deleteNumber(right);
+    left = left->next;
+    right = right->next;
+    if(left != nullptr && right != nullptr)
+    {
+      tTemp = total;
+      total = new digit;
+      total->next = tTemp;
+    }
+    else
+      break;
   }
   return total;
 }
@@ -73,24 +81,29 @@ digit *subNumbers(digit *left, digit *right)
   return theDigit;
 }*/
 
-digit *inputNum(ifstream &numFile)
+digit *loadNumber(ifstream &numFile)
 {
   if(numFile.eof())
     return nullptr;
   digit *head = new digit;
   digit *temp = head;
+
   char dig;
   int num;
-  while(!numFile.eof())
+  numFile.get(dig);
+  while(!numFile.eof() || dig != '\n')
   {
-    numFile.get(dig);
-    if (dig == '\n')
-      break;
     num = int(dig - '0');
-    //cout << num << endl;
     head->data = num;
-    temp = head;
-    head->next = temp;
+    numFile.get(dig);
+    if(dig != '\n')
+    {
+      temp = head;
+      head = new digit;
+      head->next = temp;
+    }
+    else
+      break;
   }
   return head;
 }
@@ -98,24 +111,28 @@ digit *inputNum(ifstream &numFile)
 int main()
 {
   ifstream numFile;
-  //ofstream outFile;
+  ofstream outFile;
   char op;
   digit *left, *right, *total;
-  //cout << left->data;
   numFile.open("largeNumbers.txt");
   while (!numFile.eof())
   {
-    left = inputNum(numFile);
-    right = inputNum(numFile);
+    left = loadNumber(numFile);
+    right = loadNumber(numFile);
     op = getOperator(numFile);
     if(op == '+')
       total = addNumbers(left,right);
-
+      /*while(total != nullptr)
+      {
+        cout << total->data;
+        total = total->next;
+      }*/
     break;
-    //numFile.get(dig);
-    //cout <<  dig;
   }
-  //outFile.open("output.txt");
+  outFile.open("output.txt");
+  writeNumber(total, outFile);
+  outFile.close();
+  numFile.close();
 
   return 0;
 }
