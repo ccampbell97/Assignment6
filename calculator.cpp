@@ -46,6 +46,7 @@ digit *addNumbers(digit *left, digit *right)
 {
   digit *total = new digit;
   digit *tTemp = total;
+  int i = 1;
   int num, carryOver = 0;
   while(true)//left != nullptr && right != nullptr)
   {
@@ -61,26 +62,41 @@ digit *addNumbers(digit *left, digit *right)
       total->data = num + carryOver;
       carryOver = 0;
     }
-    left = left->next;
-    right = right->next;
+    //left = left->next;
+    //right = right->next;
+    //cout << "Hello " << i << endl;
+    //i = i + 1;
     if(left->next != nullptr && right->next != nullptr)
     {
+      left = left->next;
+      right = right->next;
       tTemp = total;
       total = new digit;
       total->next = tTemp;
     }
-    else if(left != nullptr && right == nullptr)
+    else if(left->next != nullptr && right->next == nullptr)
     {
-      cout << "Hello" << endl;
-      tTemp = total;
-      total = new digit;
-      total->next = tTemp;
+      left = left->next;
+      while(left != nullptr)
+      {
+        tTemp = total;
+        total = new digit;
+        total->next = tTemp;
+        total->data = left->data;
+        left = left->next;
+      }
     }
-    else if(left->next == nullptr && right != nullptr)
+    else if(left->next == nullptr && right->next != nullptr)
     {
-      tTemp = total;
-      total = new digit;
-      total->next = tTemp;
+      right = right->next;
+      while(left != nullptr)
+      {
+        tTemp = total;
+        total = new digit;
+        total->next = tTemp;
+        total->data = right->data;
+        right = right->next;
+      }
     }
     else
       break;
