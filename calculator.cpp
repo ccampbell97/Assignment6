@@ -16,7 +16,9 @@ char getOperator(ifstream &file)
   char op;
   string endLine;
   file.get(op);
+  //cout << "Get Operator " << op << endl;
   getline(file, endLine);
+  //cout << "End Line " << endLine << endl;
   return op;
 }
 
@@ -45,10 +47,9 @@ digit *addNumbers(digit *left, digit *right)
   digit *total = new digit;
   digit *tTemp = total;
   int num, carryOver = 0;
-  while(left != nullptr && right != nullptr)
+  while(true)//left != nullptr && right != nullptr)
   {
     num = left->data + right->data;
-    //cout << "Num is " << num << endl;
     if(num > 9)
     {
       num = num - 10;
@@ -60,10 +61,22 @@ digit *addNumbers(digit *left, digit *right)
       total->data = num + carryOver;
       carryOver = 0;
     }
-    //cout << total->data;
     left = left->next;
     right = right->next;
-    if(left != nullptr && right != nullptr)
+    if(left->next != nullptr && right->next != nullptr)
+    {
+      tTemp = total;
+      total = new digit;
+      total->next = tTemp;
+    }
+    else if(left != nullptr && right == nullptr)
+    {
+      cout << "Hello" << endl;
+      tTemp = total;
+      total = new digit;
+      total->next = tTemp;
+    }
+    else if(left->next == nullptr && right != nullptr)
     {
       tTemp = total;
       total = new digit;
@@ -112,25 +125,32 @@ int main()
 {
   ifstream numFile;
   ofstream outFile;
+  int i = 0;
   char op;
+  string test;
   digit *left, *right, *total;
   numFile.open("largeNumbers.txt");
+  outFile.open("output.txt");
   while (!numFile.eof())
   {
     left = loadNumber(numFile);
     right = loadNumber(numFile);
+    if (left == nullptr || right == nullptr)
+        break;
     op = getOperator(numFile);
+    //cout << "Op is " << op;
     if(op == '+')
       total = addNumbers(left,right);
-      /*while(total != nullptr)
-      {
-        cout << total->data;
-        total = total->next;
-      }*/
-    break;
+    writeNumber(total, outFile);
+    //cout << "After " << op << endl;
+    i = i + 1;
+    if(i == 3)
+    {
+      //getline(numFile, test);
+      //cout << "Test is " << test << endl;
+      break;
+    }
   }
-  outFile.open("output.txt");
-  writeNumber(total, outFile);
   outFile.close();
   numFile.close();
 
