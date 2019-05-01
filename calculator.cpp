@@ -16,9 +16,7 @@ char getOperator(ifstream &file)
   char op;
   string endLine;
   file.get(op);
-  //cout << "Get Operator " << op << endl;
   getline(file, endLine);
-  //cout << "End Line " << endLine << endl;
   return op;
 }
 
@@ -33,22 +31,23 @@ void writeNumber(digit *num, ofstream &file)
   return;
 }
 
-digit *deleteNumber(digit *num)
+void deleteNumber(digit *num)
 {
   digit *dig;
-  dig = num->next;
-  delete num;
-  num = dig;
-  return dig;
+  while (num != nullptr)
+  {
+    dig = num->next;
+    delete num;
+    num = dig;
+  }
 }
 
 digit *addNumbers(digit *left, digit *right)
 {
   digit *total = new digit;
   digit *tTemp = total;
-  int i = 1;
   int num, carryOver = 0;
-  while(true)//left != nullptr && right != nullptr)
+  while(left != nullptr && right != nullptr)
   {
     num = left->data + right->data;
     if(num > 9)
@@ -62,19 +61,15 @@ digit *addNumbers(digit *left, digit *right)
       total->data = num + carryOver;
       carryOver = 0;
     }
-    //left = left->next;
-    //right = right->next;
-    //cout << "Hello " << i << endl;
-    //i = i + 1;
-    if(left->next != nullptr && right->next != nullptr)
+    left = left->next;
+    right = right->next;
+    if(left != nullptr && right != nullptr)
     {
-      left = left->next;
-      right = right->next;
       tTemp = total;
       total = new digit;
       total->next = tTemp;
     }
-    else if(left->next != nullptr && right->next == nullptr)
+    else if(left != nullptr && right == nullptr)
     {
       left = left->next;
       while(left != nullptr)
@@ -83,34 +78,30 @@ digit *addNumbers(digit *left, digit *right)
         total = new digit;
         total->next = tTemp;
         total->data = left->data;
+        if(left->next == nullptr)
+          break;
         left = left->next;
       }
     }
-    else if(left->next == nullptr && right->next != nullptr)
+    else if(left == nullptr && right != nullptr)
     {
       right = right->next;
-      while(left != nullptr)
+      while(right != nullptr)
       {
         tTemp = total;
         total = new digit;
         total->next = tTemp;
         total->data = right->data;
+        if(right->next == nullptr)
+          break;
         right = right->next;
       }
     }
-    else
-      break;
   }
   return total;
 }
-/*
-digit *subNumbers(digit *left, digit *right)
-{
-  digit theDigit;
-  return theDigit;
-}*/
 
-digit *loadNumber(ifstream &numFile)
+digit *writeNumber(ifstream &numFile)
 {
   if(numFile.eof())
     return nullptr;
@@ -118,15 +109,19 @@ digit *loadNumber(ifstream &numFile)
   digit *temp = head;
 
   char dig;
+  string crap;
   int num;
   numFile.get(dig);
+  num = int(dig - '0');
   while(!numFile.eof() || dig != '\n')
   {
-    num = int(dig - '0');
     head->data = num;
     numFile.get(dig);
     if(dig != '\n')
     {
+      num = int(dig - '0');
+      if (num == -48)
+        break;
       temp = head;
       head = new digit;
       head->next = temp;
@@ -149,26 +144,27 @@ int main()
   outFile.open("output.txt");
   while (!numFile.eof())
   {
-    left = loadNumber(numFile);
-    right = loadNumber(numFile);
+    left = writeNumber(numFile);
+    right = writeNumber(numFile);
     if (left == nullptr || right == nullptr)
-        break;
+    {
+      break;
+    }
     op = getOperator(numFile);
-    //cout << "Op is " << op;
     if(op == '+')
       total = addNumbers(left,right);
     writeNumber(total, outFile);
-    //cout << "After " << op << endl;
+    deleteNumber(left);
+    deleteNumber(right);
+    deleteNumber(total);
+    left = nullptr;
+    right = nullptr;
+    total = nullptr;
     i = i + 1;
-    if(i == 3)
-    {
-      //getline(numFile, test);
-      //cout << "Test is " << test << endl;
+    if(i == 5)
       break;
-    }
   }
   outFile.close();
   numFile.close();
-
   return 0;
 }
